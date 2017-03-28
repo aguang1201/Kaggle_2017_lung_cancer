@@ -59,7 +59,7 @@ validation_data = much_data[-100:]
 
 def train_neural_network(x):
     prediction = convolutional_neural_network(x)
-    cost = tf.reduce_mean( tf.nn.softmax_cross_entropy_with_logits(prediction,y) )
+    cost = tf.reduce_mean( tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y) )
     optimizer = tf.train.AdamOptimizer(learning_rate=1e-3).minimize(cost)
     
     hm_epochs = 10
