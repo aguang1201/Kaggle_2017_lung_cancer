@@ -4,6 +4,7 @@ from tflearn.layers.conv import conv_3d, max_pool_3d
 from tflearn.layers.estimator import regression
 import tensorflow as tf
 import numpy as np
+import cnn_3d_network as cnn3d
 
 much_data = np.load('muchdata-50-50-20.npy')
 X = [line[0] for line in much_data]
@@ -16,41 +17,20 @@ n_classes = 2
 batch_size = 10
 keep_rate = 0.8
 
-
 # Building 'AlexNet'
-network = input_data(shape=[None, IMG_SIZE_PX, IMG_SIZE_PX, SLICE_COUNT, 1])
-network = conv_3d(network, 32, 3, [50, 50, 20])
-network = tf.activation(tflearn.batch_normalization(network),activation='relu')
-network = max_pool_3d(network, 3, strides=2)
-
-network = conv_3d(network, 64, 3, [25, 25, 10])
-network = tf.activation(tflearn.batch_normalization(network),activation='relu')
-network = max_pool_3d(network, 3, strides=2)
-
-network = conv_3d(network, 128, 3, [13, 13, 5])
-network = tf.activation(tflearn.batch_normalization(network),activation='relu')
-
-network = conv_3d(network, 256, 3, [13, 13, 5])
-network = tf.activation(tflearn.batch_normalization(network),activation='relu')
-network = max_pool_3d(network, 3, strides=2)
-
-network = fully_connected(network, 2048)
-network = tf.activation(tflearn.batch_normalization(network),activation='relu')
-network = dropout(network, keep_rate)
-
-network = fully_connected(network, 2048)
-network = tf.activation(tflearn.batch_normalization(network),activation='relu')
-network = dropout(network, keep_rate)
-
-network = fully_connected(network, n_classes)
-
-network = regression(network, optimizer='adam',
-                     loss='softmax_categorical_crossentropy',
-                     learning_rate=0.001)
+network = cnn3d.create_cnn_3d_network()
 
 # Training
 model = tflearn.DNN(network, checkpoint_path='model_alexnet',
                     max_checkpoints=1, tensorboard_verbose=2)
+
+model_file = "./model/cnn_3d.ckpt"
+if os.path.isfile(model_file + ".index"):
+        model.load(model_file)
+        print('load modle:' + model_file)
+        
 model.fit(X, Y, n_epoch=10, validation_set=0.1, shuffle=True,
           show_metric=True, batch_size=16, snapshot_step=10,
           snapshot_epoch=True) 
+
+model.save(model_file)
