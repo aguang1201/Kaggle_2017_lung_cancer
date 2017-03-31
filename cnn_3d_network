@@ -1,3 +1,8 @@
+import tflearn
+from tflearn.layers.core import input_data, dropout, fully_connected
+from tflearn.layers.conv import conv_3d, max_pool_3d
+from tflearn.layers.estimator import regression
+
 def create_cnn_3d_network:
   # Building 'AlexNet'
   network = input_data(shape=[None, IMG_SIZE_PX, IMG_SIZE_PX, SLICE_COUNT, 1])
