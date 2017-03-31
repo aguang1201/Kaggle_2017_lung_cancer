@@ -1,0 +1,10 @@
+import tflearn
+import cnn_3d_network as cnn3d
+
+network = cnn3d.create_cnn_3d_network()
+model = tflearn.DNN(network)
+model_file = "./model/cnn_3d.ckpt"
+if os.path.isfile(model_file + ".index"):
+        model.load(model_file)
+        print('load modle:' + model_file)
+model.predict(images)
