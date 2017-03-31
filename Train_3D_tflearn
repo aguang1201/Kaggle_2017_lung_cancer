@@ -43,10 +43,10 @@ network = fully_connected(network, 2048)
 network = tf.activation(tflearn.batch_normalization(network),activation='relu')
 network = dropout(network, keep_rate)
 
-network = fully_connected(network, n_classes, activation='softmax')
+network = fully_connected(network, n_classes)
 
 network = regression(network, optimizer='adam',
-                     loss='categorical_crossentropy',
+                     loss='softmax_categorical_crossentropy',
                      learning_rate=0.001)
 
 # Training
