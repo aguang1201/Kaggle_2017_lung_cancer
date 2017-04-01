@@ -72,7 +72,7 @@ def train_neural_network(x):
     model_path = "./model/cnn_3d.ckpt"
     with tf.Session() as sess,tf.device('/gpu:0'):
         if os.path.isfile(model_path):
-            saver.restore(sess, mode,l_path)
+            saver.restore(sess, model_path)
 
         sess.run(tf.global_variables_initializer())
 
