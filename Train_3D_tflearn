@@ -1,36 +1,40 @@
 import tflearn
-from tflearn.layers.core import input_data, dropout, fully_connected
-from tflearn.layers.conv import conv_3d, max_pool_3d
-from tflearn.layers.estimator import regression
-import tensorflow as tf
 import numpy as np
 import cnn_3d_network as cnn3d
+import os
+import tensorflow
 
-much_data = np.load('muchdata-50-50-20.npy')
-X = [line[0] for line in much_data]
+BATCH_SIZE = 16
+N_EPOCH = 1
+much_data = np.load('./preprocessing_model/muchdata_1.npy')
+
+# Normalization
+MIN_BOUND = -1000.0
+MAX_BOUND = 400.0
+
+def normalize(image):
+    image = (image - MIN_BOUND) / (MAX_BOUND - MIN_BOUND)
+    image[image > 1] = 1.
+    image[image < 0] = 0.
+    return image
+
+X = [normalize(line[0]) for line in much_data]
 Y = [line[1] for line in much_data]
 
-IMG_SIZE_PX = 50
-SLICE_COUNT = 20
-
-n_classes = 2
-batch_size = 10
-keep_rate = 0.8
-
 # Building 'AlexNet'
-network = cnn3d.create_cnn_3d_network()
+network = cnn3d.create_cnn_3d_alex()
 
 # Training
-model = tflearn.DNN(network, checkpoint_path='model_alexnet',
+model = tflearn.DNN(network, checkpoint_path='./checkpoint/model_alexnet',
                     max_checkpoints=1, tensorboard_verbose=2)
 
-model_file = "./model/cnn_3d.ckpt"
+model_file = "./model_tflean/cnn_3d.ckpt"
 if os.path.isfile(model_file + ".index"):
-        model.load(model_file)
-        print('load modle:' + model_file)
-        
-model.fit(X, Y, n_epoch=10, validation_set=0.1, shuffle=True,
-          show_metric=True, batch_size=16, snapshot_step=10,
-          snapshot_epoch=True) 
+    model.load(model_file)
+    print('load modle:' + model_file)
+
+model.fit(X, Y, n_epoch=N_EPOCH, validation_set=0.1, shuffle=True,
+          show_metric=True, batch_size=BATCH_SIZE, snapshot_step=10,
+          snapshot_epoch=True)
 
 model.save(model_file)
