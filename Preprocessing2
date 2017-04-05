@@ -13,8 +13,18 @@ import math
 INPUT_FOLDER = '/home/wisdom/deeplearningdata/kaggle_2017_cancer/stage1/'
 patients = os.listdir(INPUT_FOLDER)
 patients.sort()
-patients_1 = patients[:math.ceil(len(patients)/2)]
-patients_2 = patients[math.ceil(len(patients)/2):]
+patients_1 = patients[:1*math.ceil(len(patients)/10)]
+patients_2 = patients[1*math.ceil(len(patients)/10):2*math.ceil(len(patients)/10)]
+patients_3 = patients[2*math.ceil(len(patients)/10):3*math.ceil(len(patients)/10)]
+patients_4 = patients[3*math.ceil(len(patients)/10):4*math.ceil(len(patients)/10)]
+patients_5 = patients[4*math.ceil(len(patients)/10):5*math.ceil(len(patients)/10)]
+patients_6 = patients[5*math.ceil(len(patients)/10):6*math.ceil(len(patients)/10)]
+patients_7 = patients[6*math.ceil(len(patients)/10):7*math.ceil(len(patients)/10)]
+patients_8 = patients[7*math.ceil(len(patients)/10):8*math.ceil(len(patients)/10)]
+patients_9 = patients[8*math.ceil(len(patients)/10):9*math.ceil(len(patients)/10)]
+patients_10 = patients[9*math.ceil(len(patients)/10):]
+
+patients_list = [patients_1,patients_2,patients_3,patients_4,patients_5,patients_6,patients_7,patients_8,patients_9,patients_10]
 
 labels = pd.read_csv('/home/wisdom/PycharmProjects/kaggle_2017_cancer/input/stage1_labels.csv', index_col=0)
 much_data = []
@@ -159,30 +169,32 @@ def zero_center(image):
     image = image - PIXEL_MEAN
     return image
 
-for num, patient in enumerate(patients_2):
-    t1 = datetime.datetime.now()
-    try:
-        label = labels.get_value(patient, 'cancer')
-        if label == 1:
-            label = np.array([0, 1])
-        elif label == 0:
-            label = np.array([1, 0])
-        patient = load_scan(INPUT_FOLDER + patient)
-        patient_pixels = get_pixels_hu(patient)
-        pix_resampled, _ = resample(patient_pixels, patient, [1, 1, 1])
-        segmented_lungs = segment_lung_mask(pix_resampled, False)
-        segmented_lungs_fill = segment_lung_mask(pix_resampled, True)
-        lungs_structures = segmented_lungs_fill - segmented_lungs
-        #lungs_structures_3D_image = lungs_structures.transpose(2, 1, 0)
-        #patient_lungs_structures_3D_image=zero_center(normalize(lungs_structures_3D_image))
+for i, patients in enumerate(patients_list):
+    if i >3:
+        for num, patient in enumerate(patients):
+            t1 = datetime.datetime.now()
+            try:
+                label = labels.get_value(patient, 'cancer')
+                if label == 1:
+                    label = np.array([0, 1])
+                elif label == 0:
+                    label = np.array([1, 0])
+                patient = load_scan(INPUT_FOLDER + patient)
+                patient_pixels = get_pixels_hu(patient)
+                pix_resampled, _ = resample(patient_pixels, patient, [1, 1, 1])
+                segmented_lungs = segment_lung_mask(pix_resampled, False)
+                segmented_lungs_fill = segment_lung_mask(pix_resampled, True)
+                lungs_structures = segmented_lungs_fill - segmented_lungs
+                #lungs_structures_3D_image = lungs_structures.transpose(2, 1, 0)
+                #patient_lungs_structures_3D_image=zero_center(normalize(lungs_structures_3D_image))
 
-        # print(img_data.shape,label)
-        much_data.append([lungs_structures, label])
-        print('The translation patient number is:' + str(num))
-        t2 = datetime.datetime.now()
-        print('The used time is:' + str(t2-t1))
-    except KeyError as e:
-        print('KeyError data is:' + str(num))
-        print('KeyError patient is:' + str(patient))
+                # print(img_data.shape,label)
+                much_data.append([lungs_structures, label])
+                print('The translation patient number is:' + str(num))
+                t2 = datetime.datetime.now()
+                print('The used time is:' + str(t2-t1))
+            except KeyError as e:
+                print('KeyError data is:' + str(num))
+                print('KeyError patient is:' + str(patient))
 
-np.save('./preprocessing_model/muchdata_2.npy', much_data)
+        np.save('./preprocessing_model/muchdata_{}.npy'.format(str(i+1)), much_data)
