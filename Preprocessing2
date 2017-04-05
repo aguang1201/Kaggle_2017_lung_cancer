@@ -7,13 +7,16 @@ import pandas as pd
 from skimage import measure, morphology
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import datetime
-import tensorflow as tf
+import math
 
 # Some constants
 INPUT_FOLDER = '/home/wisdom/deeplearningdata/kaggle_2017_cancer/stage1/'
 patients = os.listdir(INPUT_FOLDER)
 patients.sort()
-labels = pd.read_csv('./input/stage1_labels.csv', index_col=0)
+patients_1 = patients[:math.ceil(len(patients)/2)]
+patients_2 = patients[math.ceil(len(patients)/2):]
+
+labels = pd.read_csv('/home/wisdom/PycharmProjects/kaggle_2017_cancer/input/stage1_labels.csv', index_col=0)
 much_data = []
 # Load the scans in given folder path
 def load_scan(path):
@@ -156,7 +159,7 @@ def zero_center(image):
     image = image - PIXEL_MEAN
     return image
 
-for num, patient in enumerate(patients):
+for num, patient in enumerate(patients_2):
     t1 = datetime.datetime.now()
     try:
         label = labels.get_value(patient, 'cancer')
@@ -170,11 +173,11 @@ for num, patient in enumerate(patients):
         segmented_lungs = segment_lung_mask(pix_resampled, False)
         segmented_lungs_fill = segment_lung_mask(pix_resampled, True)
         lungs_structures = segmented_lungs_fill - segmented_lungs
-        lungs_structures_3D_image = lungs_structures.transpose(2, 1, 0)
+        #lungs_structures_3D_image = lungs_structures.transpose(2, 1, 0)
         #patient_lungs_structures_3D_image=zero_center(normalize(lungs_structures_3D_image))
 
         # print(img_data.shape,label)
-        much_data.append([lungs_structures_3D_image, label])
+        much_data.append([lungs_structures, label])
         print('The translation patient number is:' + str(num))
         t2 = datetime.datetime.now()
         print('The used time is:' + str(t2-t1))
@@ -182,4 +185,4 @@ for num, patient in enumerate(patients):
         print('KeyError data is:' + str(num))
         print('KeyError patient is:' + str(patient))
 
-np.save('./preprocessing_model/muchdata.npy', much_data)
+np.save('./preprocessing_model/muchdata_2.npy', much_data)
