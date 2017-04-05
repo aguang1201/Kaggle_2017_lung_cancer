@@ -1,10 +1,35 @@
 import tflearn
 import cnn_3d_network as cnn3d
+import os
+import numpy as np
 
-network = cnn3d.create_cnn_3d_network()
-model = tflearn.DNN(network)
-model_file = "./model/cnn_3d.ckpt"
-if os.path.isfile(model_file + ".index"):
-        model.load(model_file)
-        print('load modle:' + model_file)
-model.predict(images)
+def prediction(images):
+    network = cnn3d.create_cnn_3d_alex()
+    model = tflearn.DNN(network)
+    model_file = "./model_tflean/cnn_3d.ckpt"
+    if os.path.isfile(model_file + ".index"):
+            model.load(model_file)
+            print('load modle:' + model_file)
+    return model.predict(images)
+
+# Normalization
+MIN_BOUND = -1000.0
+MAX_BOUND = 400.0
+def normalize(image):
+    image = (image - MIN_BOUND) / (MAX_BOUND - MIN_BOUND)
+    image[image > 1] = 1.
+    image[image < 0] = 0.
+    return image
+
+test_data = np.load('./preprocessing_model/muchdata_test.npy')
+
+X = [normalize(line[0]) for line in test_data]
+Y = [line[1] for line in test_data]
+
+results = prediction(X)
+results_list = []
+
+for patient,predict in zip(X,results):
+    results_list.append([patient,predict[0][1]])
+
+np.save('./output/results.txt', results_list)
