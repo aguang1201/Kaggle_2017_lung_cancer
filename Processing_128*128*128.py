@@ -121,8 +121,8 @@ def segment_lung_mask(image, fill_lung_structures=True):
             # axial_slice = axial_slice - 1  #it will be minus 1 in next section so disable here, Jin
             # labeling = measure.label(axial_slice) # specifically set background=0 as below, but not necessary, Jin
             labeling = measure.label(axial_slice, background=0)
-            # l_max = largest_label_volume(labeling, bg=0) # have to change to bg=-1 as shown below, Jin
-            l_max = largest_label_volume(labeling, bg=-1)
+            l_max = largest_label_volume(labeling, bg=0) # have to change to bg=-1 as shown below, Jin
+            # l_max = largest_label_volume(labeling, bg=-1)
             if l_max is not None:  # This slice contains some lung
                 binary_image[i][labeling != l_max] = 1
 
@@ -131,8 +131,8 @@ def segment_lung_mask(image, fill_lung_structures=True):
 
     # Remove other air pockets insided body
     labels = measure.label(binary_image, background=0)
-    # l_max = largest_label_volume(labels, bg=0) # have to change to bg=-1 as shown below, Jin
-    l_max = largest_label_volume(labels, bg=-1)
+    l_max = largest_label_volume(labels, bg=0) # have to change to bg=-1 as shown below, Jin
+    # l_max = largest_label_volume(labels, bg=-1)
     if l_max is not None:  # There are air pockets
         binary_image[labels != l_max] = 0
 
