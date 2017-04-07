@@ -1,0 +1,35 @@
+import tflearn
+import numpy as np
+import cnn_3d_network as cnn3d
+import os
+import datetime
+
+BATCH_SIZE = 32
+N_EPOCH = 10
+IMG_SIZE_PX = 128
+much_data = np.load('./preprocessing_model/muchdata_lungs_structures_128*128*128.npy')
+
+t1 = datetime.datetime.now()
+
+X = [np.expand_dims(line[0], -1) for line in much_data]
+Y = [line[1] for line in much_data]
+
+# Building 'AlexNet'
+
+network = cnn3d.create_cnn_3d_alex()
+model_file = "./model_tflean/cnn_3d_alex.ckpt"
+# Training
+model = tflearn.DNN(network, checkpoint_path=model_file,
+                        max_checkpoints=2, tensorboard_verbose=2,tensorboard_dir="./logs")
+
+if os.path.isfile(model_file + ".index"):
+    model.load(model_file)
+    print('load modle:' + model_file)
+
+model.fit(X, Y, n_epoch=N_EPOCH, validation_set=0.1, shuffle=True,
+          show_metric=True, batch_size=BATCH_SIZE, snapshot_step=10,
+          snapshot_epoch=True)
+
+model.save(model_file)
+t2 = datetime.datetime.now()
+print('The used time is:' + str(t2-t1))
